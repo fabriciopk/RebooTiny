@@ -54,7 +54,7 @@ void loop() {
     if (!client.connect(host, httpPort)) {
       Serial.println("connection failed");
       con_count++;
-      user_log += "\nping failed: count=";
+      user_log += "<p>ping failed: count=";
       user_log += con_count;
       if(con_count > 10 ){
         Serial.print("contagem: "); Serial.println(con_count);
