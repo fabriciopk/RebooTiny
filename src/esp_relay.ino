@@ -9,17 +9,23 @@ int con_count = 0;
 String buf;
 String user_log;
 
+int ping_count = 0;
+int last_ping = 0;
+
 WiFiServer server(80);
-WiFiClient client;
+WiFiClient clientPing;
 const int httpPort = 80;
 
 void setup() {
-  Serial.begin(115200);
-  delay(5000);
+  Serial.begin(9600);
 
   // prepare GPIO2
   pinMode(2, OUTPUT);
   digitalWrite(2, 0);
+
+  delay(5000);
+
+
   // Connect to WiFi network
 
   Serial.print("Connecting to ");
@@ -35,55 +41,57 @@ void setup() {
   Serial.println("");
   Serial.println("WiFi connected");
 
-  user_log = "WiFi connected<p>IP: ";
+  user_log = "WiFi connected<br>IP: ";
 
   // Start the server
   server.begin();
   Serial.println("Server started");
   Serial.println(WiFi.localIP());
-
   user_log += WiFi.localIP().toString();
+
 }
 
 void loop() {
-
-  WiFiClient client = server.available();
-  if (!client) {
+  WiFiClient clientServer = server.available();
+  if (!clientServer) {
     //ping
     Serial.println("no server available");
-    if (!client.connect(host, httpPort)) {
-      Serial.println("connection failed");
-      con_count++;
-      user_log += "<p>ping failed: count=";
-      user_log += con_count;
-      if(con_count > 10 ){
-        Serial.print("contagem: "); Serial.println(con_count);
-        WiFi.disconnect();
-        reiniciaTomada();
-        con_count = 0;
-        WiFi.begin(ssid, password);
+    if (ping_count++ >= 50) {
+      if (!clientPing.connect(host, httpPort)) {
+        Serial.println("connection failed");
+        //user_log += "<p>ping failed: count=";
+        //user_log += ++con_count;
+        if (con_count >= 25 ) {
+          Serial.print("contagem: "); Serial.println(con_count);
+          user_log += "<br>restarting";
+          WiFi.disconnect();
+          reiniciaTomada();
+          con_count = 0;
+          WiFi.begin(ssid, password);
 
-        while (WiFi.status() != WL_CONNECTED) {
-          delay(500);
-          Serial.print(":");
+          while (WiFi.status() != WL_CONNECTED) {
+            delay(500);
+            Serial.print(":");
+          }
         }
+      } else {
+        Serial.println("ping success");
+        con_count = 0;
+        ping_count = 0;
       }
-      return;
-    } else{
-      Serial.println("ping success");
-      con_count = 0;
     }
+    delay(200);
     return;
   }
 
   Serial.println("new client");
-  while(!client.available()){
+  while (!clientServer.available()) {
     Serial.println("no client available");
   }
 
-  String req = client.readStringUntil('\r');
+  String req = clientServer.readStringUntil('\r');
   Serial.println(req);
-  client.flush();
+  clientServer.flush();
 
   buf = "";
 
@@ -91,17 +99,14 @@ void loop() {
   buf += "<script>if (window.location.toString().includes(\"reboot\")){setTimeout(function(){window.location=\"http://";
   buf += WiFi.localIP().toString();
   buf += "\"} ,15000);};</script>";
-  buf += "<h3> ESP8266 Web Server</h3>";
+  buf += "<h3> ESP8266 Web Server</h3><p><a href=\"?debug=ok\">Debug Inc</a></form><p>";
   buf += "<p>GPIO2<form method=\"get\"> <input type=\"submit\" name=\"reboot\" value=\"Reboot\" />";
 
-// <a href=\"?function=reboot\">    </a>
-  //client.print(buf);
-
-  if (req.indexOf("reboot") != -1){
-    buf += "<p>Will restart</html>";
-    client.print(buf);
-    client.flush();
-    client.stop();
+  if (req.indexOf("reboot") != -1) {
+    buf += "<p>Will restart<br>The page will refresh automatically</html>";
+    clientServer.print(buf);
+    clientServer.flush();
+    clientServer.stop();
     delay(1000);
     con_count = 0;
 
@@ -114,31 +119,31 @@ void loop() {
       Serial.print(":");
     }
 
-  } else if (req.indexOf("log") != -1){
+  } else if (req.indexOf("log=ok") != -1) {
     buf += "<a href=\"http://";
     buf += WiFi.localIP().toString();
     buf += "\">Hide Log</a></form>";
-    buf += "<p><hr><p>count: ";
+    buf += "<br><hr>count: ";
     buf += con_count;
-    buf += "<p>";
+    buf += "<br>";
     buf += user_log;
     buf += "<hr></html>";
-    client.print(buf);
-    client.flush();
-    client.stop();
+    clientServer.print(buf);
+    clientServer.flush();
+    clientServer.stop();
   }
   else {
     buf += "<a href=\"?log=ok\">Show Log</a></form>";
     buf += "<p>Ready</html>";
-    client.print(buf);
-    client.flush();
+    clientServer.print(buf);
+    clientServer.flush();
     Serial.println("invalid request");
-    client.stop();
+    clientServer.stop();
   }
   Serial.println("Client disonnected");
 }
 
-void reiniciaTomada(){
+void reiniciaTomada() {
   Serial.println("Reinicia tomada");
   digitalWrite(2, 1);
   delay(7000);
