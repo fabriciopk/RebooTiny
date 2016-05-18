@@ -61,7 +61,7 @@ void loop() {
         Serial.println("connection failed");
         //user_log += "<p>ping failed: count=";
         //user_log += ++con_count;
-        if (con_count >= 25 ) {
+        if (con_count++ >= 10 ) {
           Serial.print("contagem: "); Serial.println(con_count);
           user_log += "<br>restarting";
           WiFi.disconnect();
