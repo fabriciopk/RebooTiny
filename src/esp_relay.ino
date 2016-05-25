@@ -1,6 +1,7 @@
+#include <ArduinoOTA.h>
 #include <ESP8266WiFi.h>
 
-const char* ssid = “YOUR_SSID”;
+const char* ssid = “TOUR_SSID”;
 const char* password = “YOUR_PASSWD”;
 const char* host = "www.google.com";
 
@@ -19,14 +20,16 @@ WiFiClient clientServer;
 WiFiClient clientPing;
 const int httpPort = 80;
 
+void reboot();
+
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(2, OUTPUT);
   digitalWrite(2, 0);
   debug_inc = 0;
   enabled = 1;
   restarts = 0;
-  rebooted = 0;
+  rebooted = 1;
 
   // Connect to WiFi network
   Serial.print("Connecting to ");
@@ -53,6 +56,7 @@ void setup() {
   userLog = "IP: ";
   userLog += WiFi.localIP().toString();
 
+  ArduinoOTA.begin();
   time_count = millis();
 }
 
@@ -82,6 +86,7 @@ void loop() {
       }
     }
     delay(200);
+    ArduinoOTA.handle();
   }
 
   req = clientServer.readStringUntil('\r');
@@ -107,7 +112,7 @@ void loop() {
     buf += restarts;
     buf += "<br>";
     buf += userLog;
-    buf += "<hr>";
+    buf += "<br>Version: 1.0<hr>";
     clientServer.print(buf);
     clientServer.flush();
     clientServer.stop();
@@ -137,9 +142,9 @@ void loop() {
     buf += "<script>enabled=";
     buf += (int)enabled;
     if (enabled) {
-      buf += ";\r\n$(\"#enableButton\").css(\"color\", \"green\");\r\n$(\"#enableButton\").prop(\"value\", \"Disable RebooTinny\");\r\n";
+      buf += ";$(\"#enableButton\").css(\"color\", \"green\");$(\"#enableButton\").prop(\"value\", \"Disable RebooTinny\");";
     } else {
-      buf += ";\r\n$(\"#enableButton\").css(\"color\", \"red\");\r\n$(\"#enableButton\").prop(\"value\", \"Enable RebooTinny\");\r\n";
+      buf += ";$(\"#enableButton\").css(\"color\", \"red\");$(\"#enableButton\").prop(\"value\", \"Enable RebooTinny\");";
     }
     buf += "</script>";
     clientServer.print(buf);
@@ -154,13 +159,13 @@ void loop() {
     buf += failure_time;
     buf += " -- seconds<br>reboot: ";
     buf += reboot_time;
-    buf += " -- seconds\r\n<hr></body></html>";
+    buf += " -- seconds<hr></body></html>";
     clientServer.print(buf);
     clientServer.flush();
     clientServer.stop();
 
   } else if (req.indexOf("config=set") != -1) {
-    buf = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><hr>\r\n";
+    buf = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><hr>";
     int index, index1, index2, index3, index4;
     String s1, s2, s3;
 
@@ -197,34 +202,37 @@ void loop() {
     clientServer.stop();
 
   } else {
+
     buf = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n";
     buf += "<head>\r\n<meta charset=\"utf-8\">\r\n<title>RebooTinny</title>\r\n</head>\r\n";
 
-    buf += "<body>\r\n<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js\"></script>\r\n<script>\r\n";
+    buf += "<body><script src=\"http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js\"></script><script>";
     buf += "var logShow=false;\r\nvar IP = \"";
     buf += WiFi.localIP().toString();
-    buf += "\";\r\nvar enabled = ";
+    buf += "\";var enabled = ";
     buf += (int)enabled;
-    buf += ";\r\nfunction inc(){\r\n$.get(\"http://\".concat(IP), \"increment=ok\", function(ret){\r\n$(\"#dynamicPlace\").html(ret);});\r\n}\r\n";
-    buf += "function log(){\r\nif(logShow){\r\nlogShow=false;\r\n$(\"#dynamicPlace\").html(\"\");\r\n $(\"#logButton\").prop(\"value\", \"Show Log\"); \r\n";
-    buf += "} else{\r\nlogShow=true;\r\n$.get(\"http://\".concat(IP), \"log=show\", function(ret){\r\n$(\"#dynamicPlace\").html(ret);\r\n";
-    buf += "$(\"#logButton\").prop(\"value\", \"Hide Log\");\r\n});\r\n}\r\n}\r\n";
-    buf += "function reboot(){\r\n$.get(\"http://\".concat(IP), \"reboot=now\", function(ret){$(\"#dynamicPlace\").html(ret);});\r\n";
-    buf += "setTimeout(function(){location.reload();},15000);\r\n}\r\n";
-    buf += "function enable(){\r\nif(logShow) log();\r\n$.get(\"http://\".concat(IP), \"enable=toggle\", function(ret){$(\"#dynamicPlace\").html(ret);});\r\n}\r\n";
-    buf += "</script>\r\n";
+    clientServer.print(buf);
+    buf = ";function inc(){$.get(\"http://\".concat(IP), \"increment=ok\", function(ret){$(\"#dynamicPlace\").html(ret);});}";
+    buf += "function log(){if(logShow){logShow=false;$(\"#dynamicPlace\").html(\"\");$(\"#logButton\").prop(\"value\", \"Show Log\");";
+    buf += "} else{\r\nlogShow=true;$.get(\"http://\".concat(IP), \"log=show\",function(ret){$(\"#dynamicPlace\").html(ret);";
+    buf += "$(\"#logButton\").prop(\"value\", \"Hide Log\");});}}";
+    buf += "function reboot(){\r\n$.get(\"http://\".concat(IP), \"reboot=now\", function(ret){$(\"#dynamicPlace\").html(ret);});";
+    buf += "setTimeout(function(){location.reload();},15000);}";
+    buf += "function enable(){if(logShow) log();$.get(\"http://\".concat(IP), \"enable=toggle\", function(ret){$(\"#dynamicPlace\").html(ret);});}";
+    buf += "</script>";
 
-    buf += "<h2>RebooTinny</h2>\r\n";
-    buf += "<input type=\"button\" onclick=\"inc()\" value=\"Increment Debug\">\r\n<br>\r\n";
-    buf += "<input type=\"button\" onclick=\"enable()\" id=\"enableButton\">\r\n<br>\r\n";
-    buf += "<input type=\"button\" onclick=\"log()\" value=\"Show Log\" id=\"logButton\">\r\n<br>\r\n";
-    buf += "<input type=\"button\" onclick=\"reboot()\" value=\"Reboot\" >\r\n<br>\r\n";
-    buf += "<div id=\"dynamicPlace\"></div>\r\n";
+    clientServer.print(buf);
+    buf = "<h2>RebooTinny</h2>";
+    buf += "<input type=\"button\" onclick=\"inc()\" value=\"Increment Debug\"><br>";
+    buf += "<input type=\"button\" onclick=\"enable()\" id=\"enableButton\"><br>";
+    buf += "<input type=\"button\" onclick=\"log()\" value=\"Show Log\" id=\"logButton\"><br>";
+    buf += "<input type=\"button\" onclick=\"reboot()\" value=\"Reboot\" ><br>";
+    buf += "<div id=\"dynamicPlace\"></div>";
 
-    buf += "<script>\r\n";
-    buf += "if(enabled){\r\n$(\"#enableButton\").css(\"color\", \"green\");\r\n$(\"#enableButton\").prop(\"value\", \"Disable RebooTinny\");\r\n";
-    buf += "}else{\r\n$(\"#enableButton\").css(\"color\", \"red\");\r\n$(\"#enableButton\").prop(\"value\", \"Enable RebooTinny\");\r\n}\r\n";
-    buf += "</script>\r\n</body>\r\n</html>";
+    buf += "<script>";
+    buf += "if(enabled){$(\"#enableButton\").css(\"color\", \"green\");$(\"#enableButton\").prop(\"value\", \"Disable RebooTinny\");";
+    buf += "}else{$(\"#enableButton\").css(\"color\", \"red\");$(\"#enableButton\").prop(\"value\", \"Enable RebooTinny\");}";
+    buf += "</script></body></html>";
 
     clientServer.print(buf);
     clientServer.flush();
