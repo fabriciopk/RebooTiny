@@ -1,8 +1,8 @@
 #include <ArduinoOTA.h>
 #include <ESP8266WiFi.h>
 
-const char* ssid = “TOUR_SSID”;
-const char* password = “YOUR_PASSWD”;
+const char* ssid = "YOUR_SSID";
+const char* password = "YOUR_PASSWD";
 const char* host = "www.google.com";
 
 int ping_time = 15; // Pins each ping_time seconds
@@ -112,7 +112,7 @@ void loop() {
     buf += restarts;
     buf += "<br>";
     buf += userLog;
-    buf += "<br>Version: 1.0<hr>";
+    buf += "<br>Version: 1.1<hr>";
     clientServer.print(buf);
     clientServer.flush();
     clientServer.stop();
@@ -207,9 +207,8 @@ void loop() {
     buf += "<head>\r\n<meta charset=\"utf-8\">\r\n<title>RebooTinny</title>\r\n</head>\r\n";
 
     buf += "<body><script src=\"http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js\"></script><script>";
-    buf += "var logShow=false;\r\nvar IP = \"";
-    buf += WiFi.localIP().toString();
-    buf += "\";var enabled = ";
+    buf += "var logShow=false;\r\nvar IP = window.location.hostname;";
+    buf += "var enabled = ";
     buf += (int)enabled;
     clientServer.print(buf);
     buf = ";function inc(){$.get(\"http://\".concat(IP), \"increment=ok\", function(ret){$(\"#dynamicPlace\").html(ret);});}";
