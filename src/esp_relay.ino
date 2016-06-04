@@ -207,7 +207,7 @@ void loop() {
     buf += "<head>\r\n<meta charset=\"utf-8\">\r\n<title>RebooTinny</title>\r\n</head>\r\n";
 
     buf += "<body><script src=\"http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js\"></script><script>";
-    buf += "var logShow=false;\r\nvar IP = window.location.hostname;";
+    buf += "var logShow=false;\r\nvar IP = window.location.host;";
     buf += "var enabled = ";
     buf += (int)enabled;
     clientServer.print(buf);
