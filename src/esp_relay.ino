@@ -1,9 +1,10 @@
 #include <ArduinoOTA.h>
 #include <ESP8266WiFi.h>
 
-const char* ssid = "YOUR_SSID";
-const char* password = "YOUR_PASSWD";
-const char* host = "www.google.com";
+#define httpPort 80
+#define ssid "YOUR_SSID"
+#define password "YOUR_PASSWD"
+#define host "www.google.com"
 
 int ping_time = 15; // Pins each ping_time seconds
 int failure_time = 15; // Seconds without internet to the system reboot
@@ -11,14 +12,13 @@ int reboot_time = 60; // Seconds tolerated after each reboot
 
 String buf, req;
 String userLog;
-int debug_inc, restarts;
-char enabled, rebooted;
+unsigned char debug_inc, restarts;
+unsigned char enabled, rebooted;
 unsigned long time_count;
 
 WiFiServer server(80);
 WiFiClient clientServer;
 WiFiClient clientPing;
-const int httpPort = 80;
 
 void reboot();
 
@@ -107,9 +107,9 @@ void loop() {
     buf += "<hr>Enabled: ";
     buf += (int)enabled;
     buf += "<br>Debug count: ";
-    buf += debug_inc;
+    buf += (int)debug_inc;
     buf += "<br>Restarts: ";
-    buf += restarts;
+    buf += (int)restarts;
     buf += "<br>";
     buf += userLog;
     buf += "<br>Version: 1.1<hr>";
@@ -229,8 +229,11 @@ void loop() {
     buf += "<div id=\"dynamicPlace\"></div>";
 
     buf += "<script>";
-    buf += "if(enabled){$(\"#enableButton\").css(\"color\", \"green\");$(\"#enableButton\").prop(\"value\", \"Disable RebooTinny\");";
-    buf += "}else{$(\"#enableButton\").css(\"color\", \"red\");$(\"#enableButton\").prop(\"value\", \"Enable RebooTinny\");}";
+    if (enabled)
+      buf += "$(\"#enableButton\").css(\"color\", \"green\");$(\"#enableButton\").prop(\"value\", \"Disable RebooTinny\");";
+    else
+      buf += "$(\"#enableButton\").css(\"color\", \"red\");$(\"#enableButton\").prop(\"value\", \"Enable RebooTinny\");";
+
     buf += "</script></body></html>";
 
     clientServer.print(buf);
