@@ -11,9 +11,8 @@ int failure_time = 15; // Seconds without internet to the system reboot
 int reboot_time = 60; // Seconds tolerated after each reboot
 
 String buf, req;
-String userLog;
 String actualHour, lastRebootHour;
-unsigned char debug_inc, restarts;
+unsigned char restarts;
 unsigned char enabled, rebooted;
 unsigned long time_count;
 
@@ -27,7 +26,6 @@ void setup() {
   Serial.begin(115200);
   pinMode(2, OUTPUT);
   digitalWrite(2, 0);
-  debug_inc = 0;
   enabled = 1;
   restarts = 0;
   rebooted = 1;
@@ -56,8 +54,6 @@ void setup() {
   server.begin();
   Serial.println("Server started");
   Serial.println(WiFi.localIP());
-  userLog = "IP: ";
-  userLog += WiFi.localIP().toString();
 
   ArduinoOTA.begin();
   time_count = millis();
@@ -101,35 +97,9 @@ void loop() {
   Serial.println(req);
   clientServer.flush();
 
-  if (req.indexOf("increment=ok") != -1) {
-    debug_inc++;
-
+  if (req.indexOf("reboot=now") != -1) {
     buf = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-    buf += "<script>location.reload()</script>";
-    clientServer.print(buf);
-    clientServer.flush();
-    clientServer.stop();
-
-  } else if (req.indexOf("log=show") != -1) {
-    buf = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-    buf += "<hr>Enabled: ";
-    buf += (int)enabled;
-    buf += "<br>Last reboot (UTC time): ";
-    buf += lastRebootHour;
-    buf += "<br>Debug count: ";
-    buf += (int)debug_inc;
-    buf += "<br>Restarts: ";
-    buf += (int)restarts;
-    buf += "<br>";
-    buf += userLog;
-    buf += "<br>Version: 1.2<hr>";
-    clientServer.print(buf);
-    clientServer.flush();
-    clientServer.stop();
-
-  } else if (req.indexOf("reboot=now") != -1) {
-    buf = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-    buf += "<hr>Wait while the device reboots<br>";
+    buf += "Wait while the device reboots<br>";
     buf += "The page will refresh automatically";
     clientServer.print(buf);
     clientServer.flush();
@@ -217,25 +187,27 @@ void loop() {
     buf += "<head>\r\n<meta charset=\"utf-8\">\r\n<title>RebooTinny</title>\r\n</head>\r\n";
 
     buf += "<body><script src=\"http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js\"></script><script>";
-    buf += "var logShow=false;\r\nvar IP = window.location.host;";
-    buf += "var enabled = ";
+    buf += "var IP = window.location.host; var enabled = ";
     buf += (int)enabled;
-    clientServer.print(buf);
-    buf = ";function inc(){$.get(\"http://\".concat(IP), \"increment=ok\", function(ret){$(\"#dynamicPlace\").html(ret);});}";
-    buf += "function log(){if(logShow){logShow=false;$(\"#dynamicPlace\").html(\"\");$(\"#logButton\").prop(\"value\", \"Show Log\");";
-    buf += "} else{\r\nlogShow=true;$.get(\"http://\".concat(IP), \"log=show\",function(ret){$(\"#dynamicPlace\").html(ret);";
-    buf += "$(\"#logButton\").prop(\"value\", \"Hide Log\");});}}";
-    buf += "function reboot(){\r\n$.get(\"http://\".concat(IP), \"reboot=now\", function(ret){$(\"#dynamicPlace\").html(ret);});";
+
+    buf += ";function reboot(){\r\n$.get(\"http://\".concat(IP), \"reboot=now\", function(ret){$(\"#dynamicPlace\").html(ret);});";
     buf += "setTimeout(function(){location.reload();},15000);}";
-    buf += "function enable(){if(logShow) log();$.get(\"http://\".concat(IP), \"enable=toggle\", function(ret){$(\"#dynamicPlace\").html(ret);});}";
+    buf += "function enable(){$.get(\"http://\".concat(IP), \"enable=toggle\", function(ret){$(\"#dynamicPlace\").html(ret);});}";
     buf += "</script>";
 
     clientServer.print(buf);
     buf = "<h2>RebooTinny</h2>";
-    buf += "<input type=\"button\" onclick=\"inc()\" value=\"Increment Debug\"><br>";
     buf += "<input type=\"button\" onclick=\"enable()\" id=\"enableButton\"><br>";
-    buf += "<input type=\"button\" onclick=\"log()\" value=\"Show Log\" id=\"logButton\"><br>";
     buf += "<input type=\"button\" onclick=\"reboot()\" value=\"Reboot\" ><br>";
+    buf += "<hr>Enabled: ";
+    buf += (int)enabled;
+    buf += "<br>Last reboot (UTC time): ";
+    buf += lastRebootHour;
+    buf += "<br>Restarts: ";
+    buf += (int)restarts;
+    buf += "<br>Local IP: ";
+    buf += WiFi.localIP().toString();
+    buf += "<br>Version: 2.0<hr>";
     buf += "<div id=\"dynamicPlace\"></div>";
 
     buf += "<script>";
