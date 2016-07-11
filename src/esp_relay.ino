@@ -4,7 +4,7 @@
 #define httpPort 13
 #define ssid "YOUR_SSID"
 #define password "YOUR_PASSWD"
-#define host "time-c.nist.gov" // daytime server
+#define host "time.nist.gov" // daytime server
 
 int ping_time = 15; // Pins each ping_time seconds
 int failure_time = 15; // Seconds without internet to the system reboot
@@ -23,7 +23,6 @@ WiFiClient clientPing;
 void reboot();
 
 void setup() {
-  Serial.begin(115200);
   pinMode(2, OUTPUT);
   digitalWrite(2, 0);
   enabled = 1;
@@ -33,13 +32,9 @@ void setup() {
   lastRebootHour = "Did not reboot yet";
 
   // Connect to WiFi network
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
   WiFi.begin(ssid, password);
   time_count = millis();
   while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
 
     if (millis() - time_count >= reboot_time * 1000) {
       reboot();
@@ -48,12 +43,8 @@ void setup() {
     delay(500);
   }
 
-  Serial.println("WiFi connected");
-
   // Start the server
   server.begin();
-  Serial.println("Server started");
-  Serial.println(WiFi.localIP());
 
   ArduinoOTA.begin();
   time_count = millis();
@@ -61,7 +52,6 @@ void setup() {
 
 void loop() {
   while (! (clientServer = server.available())) {
-    Serial.println("No client available!");
     if (! enabled) {
       time_count = millis();
       rebooted = 0;
@@ -80,7 +70,6 @@ void loop() {
         reboot();
         time_count = millis();
         while (WiFi.status() != WL_CONNECTED) {
-          Serial.print(":");
           if (millis() - time_count >= reboot_time * 1000) {
             reboot();
             time_count = millis();
@@ -94,7 +83,6 @@ void loop() {
   }
 
   req = clientServer.readStringUntil('\r');
-  Serial.println(req);
   clientServer.flush();
 
   if (req.indexOf("reboot=now") != -1) {
@@ -108,7 +96,6 @@ void loop() {
     reboot();
     time_count = millis();
     while (WiFi.status() != WL_CONNECTED) {
-      Serial.print(":");
       if (millis() - time_count >= reboot_time * 1000) {
         reboot();
         time_count = millis();
@@ -207,7 +194,7 @@ void loop() {
     buf += (int)restarts;
     buf += "<br>Local IP: ";
     buf += WiFi.localIP().toString();
-    buf += "<br>Version: 2.0<hr>";
+    buf += "<br>Version: 2.1<hr>";
     buf += "<div id=\"dynamicPlace\"></div>";
 
     buf += "<script>";
@@ -222,14 +209,12 @@ void loop() {
     clientServer.flush();
     clientServer.stop();
   }
-  Serial.println("Client disonnected");
 }
 
 void reboot() {
   restarts++;
   rebooted = 1;
   lastRebootHour = actualHour;
-  Serial.println("Rebooting...");
   WiFi.disconnect();
   digitalWrite(2, 1);
   delay(7000);
