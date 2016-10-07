@@ -2,7 +2,7 @@
 #include <ArduinoOTA.h>
 
 const char* ssid = "YOUR_SSID";
-const char* password = "YOUR_PASSWD";
+const char* password = "YOUR_PASSWORD";
 
 void setup() {
   pinMode(2, OUTPUT);

@@ -1,17 +1,16 @@
 #include <ArduinoOTA.h>
 #include <ESP8266WiFi.h>
 
-#define httpPort 13
+#define httpPort 80
 #define ssid "YOUR_SSID"
-#define password "YOUR_PASSWD"
-#define host "time.nist.gov" // daytime server
+#define password "YOUR_PASSWORD"
+#define host "google.com" // daytime server
 
-int ping_time = 15; // Pins each ping_time seconds
-int failure_time = 15; // Seconds without internet to the system reboot
+int ping_time = 60; // Pins each ping_time seconds
+int failure_time = 45; // Seconds without internet to the system reboot
 int reboot_time = 60; // Seconds tolerated after each reboot
 
 String buf, req;
-String actualHour, lastRebootHour;
 unsigned char restarts;
 unsigned char enabled, rebooted;
 unsigned long time_count;
@@ -28,9 +27,7 @@ void setup() {
   enabled = 1;
   restarts = 0;
   rebooted = 1;
-  actualHour = "Couldn' get yet";
-  lastRebootHour = "Did not reboot yet";
-
+  
   // Connect to WiFi network
   WiFi.begin(ssid, password);
   time_count = millis();
@@ -58,10 +55,6 @@ void loop() {
     }
     else if (millis() - time_count >= (ping_time + (rebooted ? reboot_time : 0)) * 1000) {
       if (clientPing.connect(host, httpPort)) { // Ping
-        clientPing.write("GET / HTTP/1.1 \r\n\r\n");
-        clientPing.setTimeout(3000);
-        actualHour = clientPing.readStringUntil('\r') + " (aprox.)";
-        clientPing.flush();
         clientPing.stop();
         time_count = millis();
         rebooted = 0;
@@ -188,13 +181,11 @@ void loop() {
     buf += "<input type=\"button\" onclick=\"reboot()\" value=\"Reboot\" ><br>";
     buf += "<hr>Enabled: ";
     buf += (int)enabled;
-    buf += "<br>Last reboot (UTC time): ";
-    buf += lastRebootHour;
     buf += "<br>Restarts: ";
     buf += (int)restarts;
     buf += "<br>Local IP: ";
     buf += WiFi.localIP().toString();
-    buf += "<br>Version: 2.1<hr>";
+    buf += "<br>Version: 2.2<hr>";
     buf += "<div id=\"dynamicPlace\"></div>";
 
     buf += "<script>";
@@ -214,7 +205,6 @@ void loop() {
 void reboot() {
   restarts++;
   rebooted = 1;
-  lastRebootHour = actualHour;
   WiFi.disconnect();
   digitalWrite(2, 1);
   delay(7000);
