@@ -4,7 +4,7 @@
 #define httpPort 80
 #define ssid "YOUR_SSID"
 #define password "YOUR_PASSWORD"
-#define host "google.com" // daytime server
+#define host "google.com"
 
 int ping_time = 60; // Pins each ping_time seconds
 int failure_time = 45; // Seconds without internet to the system reboot
@@ -27,7 +27,7 @@ void setup() {
   enabled = 1;
   restarts = 0;
   rebooted = 1;
-  
+
   // Connect to WiFi network
   WiFi.begin(ssid, password);
   time_count = millis();
@@ -160,6 +160,54 @@ void loop() {
     clientServer.print(buf);
     clientServer.flush();
     clientServer.stop();
+
+  } else if (req.indexOf("rest/get") != -1) {
+    buf = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
+    buf += "{\r\n \"enabled\": ";
+    buf += enabled;
+    buf += ", \r\n \"reboots\": ";
+    buf += restarts;
+    buf += ",\r\n \"version\": 2.2 \r\n}";
+
+    //buf += " -- seconds<hr></body></html>";
+    clientServer.print(buf);
+    clientServer.flush();
+    clientServer.stop();
+
+  } else if (req.indexOf("rest/post/") != -1) {
+
+    buf = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
+
+    if (req.indexOf("reboot") != -1) {
+      buf += "{\r\n \"ok\": true\r\n}";
+      clientServer.print(buf);
+      clientServer.flush();
+      clientServer.stop();
+
+      delay(1000);
+      reboot();
+      time_count = millis();
+      while (WiFi.status() != WL_CONNECTED) {
+        if (millis() - time_count >= reboot_time * 1000) {
+          reboot();
+          time_count = millis();
+        }
+        delay(200);
+      }
+
+    } else if (req.indexOf("enable") != -1) {
+      buf += "{\r\n \"ok\": true\r\n}";
+      clientServer.print(buf);
+      clientServer.flush();
+      clientServer.stop();
+
+      enabled = enabled ^ 1;
+    } else{
+      buf += "{\r\n \"ok\": false\r\n}";
+      clientServer.print(buf);
+      clientServer.flush();
+      clientServer.stop();
+    }
 
   } else {
 
