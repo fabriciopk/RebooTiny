@@ -9,9 +9,9 @@ import {
   Text,
   View,
   TouchableOpacity,
-  TouchableHighlight,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native'
 
 export class RebooTinny_app extends Component {
@@ -54,10 +54,6 @@ export class RebooTinny_app extends Component {
         });
       }},      
     ]);
-    
-    
-    {/*fetch('http://192.168.1.10/rest/post/reboot');
-    setTimeout(() => {this.reboo_getState()}, 10000);*/}
   }
   
   reboo_enable(){
@@ -66,8 +62,10 @@ export class RebooTinny_app extends Component {
     
     this.setState({loading: true});
     fetch('http://192.168.1.10/rest/post/enable').then((res) => res.json()).then((res) => {
-      if (res.ok)
-        this.setState({loading: false, rebooEnabled : this.state.rebooEnabled^1, errorMessage: ''})
+      if (res.ok){
+        this.setState({errorMessage: ''});
+        this.reboo_getState();
+      }
     }).catch(() =>{
           this.setState({loading: false, errorMessage: 'Error sending command to RebooTinny'});
         });
@@ -75,8 +73,8 @@ export class RebooTinny_app extends Component {
   
   render() {    
     return (
-      <View style={{flex:1}}>        
-        
+      <View style={{flex:1}}>           
+
         <View style={{flex:4}}>
           <TouchableOpacity
             style={{flex:1}}
@@ -130,18 +128,35 @@ export class RebooTinny_app extends Component {
         <View
           style={{
             flex: 1,
+            flexDirection: 'row',
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: "rgba(112,154,203,1)",
           }}>
-          <Text style={{textAlign:'center'}}>
+          <Text style={{textAlign:'center', flex:3}}>
             Version: {this.state.rebooVersion}
           </Text>
+          
+          <TouchableOpacity
+            style = {{flex:1}}
+            onPress={() => {
+              this.setState({loading:true});
+              this.reboo_getState();
+            }}
+            activeOpacity={36 / 100}>
+            <Image 
+              style={{
+                flex:1,
+                width: 28,
+                height: 28,
+              }}
+              resizeMode={"contain"}
+              source={require('./static/img/refresh.png')}
+            />
+          </TouchableOpacity>
         </View>
         
-        
-        
-      </View>
+      </View>  
     );
   }
 }
