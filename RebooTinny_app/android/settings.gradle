@@ -1,0 +1,3 @@
+rootProject.name = 'RebooTinny_app'
+
+include ':app'
