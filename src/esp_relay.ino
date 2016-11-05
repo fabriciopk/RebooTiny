@@ -43,6 +43,7 @@ void setup() {
   // Start the server
   server.begin();
 
+  ArduinoOTA.setPassword((const char *)"teste123");
   ArduinoOTA.begin();
   time_count = millis();
 }
