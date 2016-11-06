@@ -91,11 +91,13 @@ script:
     - ls $TRAVIS_BUILD_DIR/build/esp_relay
 
 after_success:
-    - cd $TRAVIS_BUILD_DIR/build/esp_relay
+    - cd $TRAVIS_BUILD_DIR/build/
+    - mv BasicOTA/BasicOTA.ino.bin .
+    - mv esp_relay/esp_relay.ino.bin .
     - git init
     - git config --local user.name ${MY_NAME}
     - git config --local user.email ${MY_EMAIL}
-    - git add esp_relay.ino.bin build.options.json
+    - git add esp_relay.ino.bin BasicOTA.ino.bin
     - git commit -m "Automatically deploying to gh-pages"
     - git push --force --quiet "https://${GITHUB_TOKEN}@github.com/dalmago/RebooTinny.git" master:gh-pages
 
