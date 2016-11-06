@@ -95,7 +95,7 @@ after_success:
     - git init
     - git config --local user.name ${MY_NAME}
     - git config --local user.email ${MY_EMAIL}
-    - git add esp_relay.ino.bin
+    - git add esp_relay.ino.bin build.options.json
     - git commit -m "Automatically deploying to gh-pages"
     - git push --force --quiet "https://${GITHUB_TOKEN}@github.com/dalmago/RebooTinny.git" master:gh-pages
 
