@@ -86,7 +86,8 @@ install:
 
 script:
     - arduino --verify $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
-    - arduino --verify $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino
+    - arduino --pref build.path=/$TRAVIS_BUILD_DIR/build --verify $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino #--preserve-temp-files
+    - ls $TRAVIS_BUILD_DIR/build
 
 notifications:
       email:
