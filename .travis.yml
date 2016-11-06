@@ -85,9 +85,16 @@ install:
     #- which arduino
 
 script:
-    - arduino --verify $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
-    - arduino --pref build.path=/$TRAVIS_BUILD_DIR/build --verify $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino #--preserve-temp-files
-    - ls $TRAVIS_BUILD_DIR/build
+    - arduino --pref build.path=/$TRAVIS_BUILD_DIR/build/BasicOTA --verify $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
+    - arduino --pref build.path=/$TRAVIS_BUILD_DIR/build/esp_relay --verify $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino
+    - ls $TRAVIS_BUILD_DIR/build/esp_relay
+
+after_success:
+    - cd $TRAVIS_BUILD_DIR/build/esp_relay
+    - git init
+    - git add esp_relay.ino.bin
+    - git commit -m "Automatically deploying to gh-pages"
+    - git push "https://${GITHUB_TOKEN}@github.com/dalmago/RebooTinny.git" master:gh-pages #--force --quiet
 
 notifications:
       email:
