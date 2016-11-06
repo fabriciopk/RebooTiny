@@ -101,4 +101,9 @@ script:
     - "echo $PWD"
     - "echo $HOME"
       #- arduino --verify --board arduino:avr:uno $PWD/
-    - arduino -v --verbose-build --verify $PWD/src/BasicOTA.ino
+      #- arduino -v --verbose-build --verify $PWD/src/BasicOTA.ino
+    - arduino --verify --board arduino:avr:uno $PWD/src/BasicOTA.ino
+#notifications:
+#      email:
+#        on_success: change
+#        on_failure: change
