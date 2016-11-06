@@ -63,3 +63,49 @@
 #
 # script:
 #     - platformio ci --lib="." --board=TYPE_1 --board=TYPE_2 --board=TYPE_N
+
+sudo: false
+language: bash
+os:
+  - linux
+before_install:
+    - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
+    - sleep 3
+    - export DISPLAY=:1.0
+
+install:
+    - wget -O arduino.tar.xz https://www.arduino.cc/download.php?f=/arduino-nightly-linux64.tar.xz
+    - tar xf arduino.tar.xz
+    - mv arduino-nightly $HOME/arduino_ide
+
+    - export PATH="$HOME/arduino_ide:$TRAVIS_BUILD_DIR/tools/xtensa-lx106-elf/bin:$PATH"
+    - arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs
+    - arduino --install-boards esp8266:esp8266
+    - arduino --board esp8266:esp8266:generic:CpuFrequency=80,FlashFreq=40,FlashMode=dio,UploadSpeed=115200,FlashSize=512K0,ResetMethod=ck,Debug=Disabled,DebugLevel=None____ --save-prefs
+
+
+
+script:
+    - sed -i 's/YOUR_SSID/'"${WIFI_SSID}"'/' $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
+    - sed -i 's/YOUR_PASSWORD/'"${WIFI_PASSWD}"'/' $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
+    - sed -i 's/YOUR_SSID/'"${WIFI_SSID}"'/' $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino
+    - sed -i 's/YOUR_PASSWORD/'"${WIFI_PASSWD}"'/' $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino
+    - arduino --pref build.path=/$TRAVIS_BUILD_DIR/build/BasicOTA --verify $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
+    - arduino --pref build.path=/$TRAVIS_BUILD_DIR/build/esp_relay --verify $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino
+    - ls $TRAVIS_BUILD_DIR/build/esp_relay
+
+after_success:
+    - cd $TRAVIS_BUILD_DIR/build/
+    - cp BasicOTA/BasicOTA.ino.bin .
+    - cp esp_relay/esp_relay.ino.bin .
+    - git init
+    - git config --local user.name ${MY_NAME}
+    - git config --local user.email ${MY_EMAIL}
+    - git add esp_relay.ino.bin BasicOTA.ino.bin
+    - git commit -m "Automatically deploying to gh-pages"
+    - git push --force --quiet "https://${GITHUB_TOKEN}@github.com/dalmago/RebooTinny.git" master:gh-pages
+
+notifications:
+      email:
+        on_success: change
+        on_failure: change
