@@ -100,3 +100,5 @@ install:
 script:
     - "echo $PWD"
     - "echo $HOME"
+      #- arduino --verify --board arduino:avr:uno $PWD/
+    - arduino -v --verbose-build --verify $PWD/src/BasicOTA.ino
