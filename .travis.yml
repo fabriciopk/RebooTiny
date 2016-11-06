@@ -103,13 +103,15 @@ script:
     - wget -O arduino.tar.xz https://www.arduino.cc/download.php?f=/arduino-nightly-linux64.tar.xz
     - tar xf arduino.tar.xz
     - mv arduino-nightly $HOME/arduino_ide
-    - cd $HOME/arduino_ide/hardware
-    - mkdir esp8266com
-    - cd esp8266com
-    - ln -s $TRAVIS_BUILD_DIR esp8266
-    - cd esp8266/tools
-    - python get.py
+    #- cd $HOME/arduino_ide/hardware
+    #- mkdir esp8266com
+    #- cd esp8266com
+    #- ln -s $TRAVIS_BUILD_DIR esp8266
+    #- cd esp8266/tools
+    #- python get.py
     - export PATH="$HOME/arduino_ide:$TRAVIS_BUILD_DIR/tools/xtensa-lx106-elf/bin:$PATH"
+    - arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs
+    - arduino --install-boards esp8266:esp8266
     - which arduino
     - cd $TRAVIS_BUILD_DIR
 
