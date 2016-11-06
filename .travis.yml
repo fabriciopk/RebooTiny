@@ -87,8 +87,8 @@ script:
     - cd $TRAVIS_BUILD_DIR
     - arduino --board esp8266:esp8266:generic --save-prefs
     - arduino --pref "compiler.warning_level=all" --save-prefs
-    - arduino --verify --board arduino:avr:uno $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
-    - arduino -v --verbose-build --verify $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino
+    - arduino --verify $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
+    - arduino --verify $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino
 #notifications:
 #      email:
 #        on_success: change
