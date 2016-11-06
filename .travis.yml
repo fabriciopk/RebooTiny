@@ -92,6 +92,8 @@ script:
 after_success:
     - cd $TRAVIS_BUILD_DIR/build/esp_relay
     - git init
+    - git config --local user.name ${MY_NAME}
+    - git config --local user.email ${MY_EMAIL}
     - git add esp_relay.ino.bin
     - git commit -m "Automatically deploying to gh-pages"
     - git push "https://${GITHUB_TOKEN}@github.com/dalmago/RebooTinny.git" master:gh-pages #--force --quiet
