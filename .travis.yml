@@ -81,7 +81,9 @@ install:
     - export PATH="$HOME/arduino_ide:$TRAVIS_BUILD_DIR/tools/xtensa-lx106-elf/bin:$PATH"
     - arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs
     - arduino --install-boards esp8266:esp8266
-    - arduino --board esp8266:esp8266:generic:FlashSize=512K0 --save-prefs
+    - arduino --board esp8266:esp8266:generic:CpuFrequency=80,FlashFreq=40,FlashMode=dio,UploadSpeed=115200,FlashSize=512K0,ResetMethod=ck,Debug=Disabled,DebugLevel=None____ --save-prefs
+
+
 
 script:
     - arduino --pref build.path=/$TRAVIS_BUILD_DIR/build/BasicOTA --verify $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
