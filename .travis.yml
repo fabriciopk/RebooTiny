@@ -81,13 +81,13 @@ install:
     - export PATH="$HOME/arduino_ide:$TRAVIS_BUILD_DIR/tools/xtensa-lx106-elf/bin:$PATH"
     - arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs
     - arduino --install-boards esp8266:esp8266
-    - which arduino
+    - arduino --board esp8266:esp8266:generic --save-prefs
+    #- which arduino
 
 script:
-    - cd $TRAVIS_BUILD_DIR
-    - arduino --board esp8266:esp8266:generic --save-prefs
     - arduino --verify $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
     - arduino --verify $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino
+
 notifications:
       email:
         on_success: change
