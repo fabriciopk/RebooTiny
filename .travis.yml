@@ -96,7 +96,7 @@ after_success:
     - git config --local user.email ${MY_EMAIL}
     - git add esp_relay.ino.bin
     - git commit -m "Automatically deploying to gh-pages"
-    - git push "https://${GITHUB_TOKEN}@github.com/dalmago/RebooTinny.git" master:gh-pages #--force --quiet
+    - git push --force "https://${GITHUB_TOKEN}@github.com/dalmago/RebooTinny.git" master:gh-pages #--quiet
 
 notifications:
       email:
