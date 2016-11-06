@@ -64,64 +64,32 @@
 # script:
 #     - platformio ci --lib="." --board=TYPE_1 --board=TYPE_2 --board=TYPE_N
 
-#language: c
-#sudo: false
-#before_install:
-#      - source <(curl -SLs https://raw.githubusercontent.com/adafruit/travis-ci-arduino/master/install.sh)
-#install:
-#      - arduino --install-library "Adafruit SleepyDog Library,Adafruit FONA Library"
-#script:
-#      - build_platform esp8266
-#notifications:
-#      email:
-#        on_success: change
-#        on_failure: change
-
 sudo: false
 language: bash
 os:
   - linux
-#language: c
-#before_install:
-    #- "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
-    #- sleep 3
-    #- export DISPLAY=:1.0
-    #- wget http://downloads.arduino.cc/arduino-1.6.12-linux64.tar.xz
-    #- tar xf arduino-1.6.12-linux64.tar.xz
-    #- sudo mv arduino-1.6.12 /usr/local/share/arduino
-    #- sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
-#install:
-    #- ln -s $PWD /usr/local/share/arduino/libraries/WiFiManager
-    # boards manager not working on 1.6.7 - 1.6.8
-    #- arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs
-      # install lib arduino json not working in 1.6.5
-      #- arduino --install-library "ArduinoJson"
-      #- git clone https://github.com/bblanchon/ArduinoJson /usr/local/share/arduino/libraries/ArduinoJson
-    #- arduino --install-boards esp8266:esp8266
-script:
-    - echo $TRAVIS_BUILD_DIR
-    - wget -O arduino.tar.xz https://www.arduino.cc/download.php?f=/arduino-nightly-linux64.tar.xz
-    - tar xf arduino.tar.xz
-    - mv arduino-nightly $HOME/arduino_ide
-    #- cd $HOME/arduino_ide/hardware
-    #- mkdir esp8266com
-    #- cd esp8266com
-    #- ln -s $TRAVIS_BUILD_DIR esp8266
-    #- cd esp8266/tools
-    #- python get.py
+before_install:
     - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
     - sleep 3
     - export DISPLAY=:1.0
+
+install:
+    - wget -O arduino.tar.xz https://www.arduino.cc/download.php?f=/arduino-nightly-linux64.tar.xz
+    - tar xf arduino.tar.xz
+    - mv arduino-nightly $HOME/arduino_ide
+
     - export PATH="$HOME/arduino_ide:$TRAVIS_BUILD_DIR/tools/xtensa-lx106-elf/bin:$PATH"
     - arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs
     - arduino --install-boards esp8266:esp8266
     - which arduino
+
+script:
     - cd $TRAVIS_BUILD_DIR
 
     - arduino --board esp8266:esp8266:generic --save-prefs
     - arduino --pref "compiler.warning_level=all" --save-prefs
-    #- arduino --verify --board arduino:avr:uno $TRAVIS_BUILD_DIR/src/BasicOTA.ino
-    - arduino -v --verbose-build --verify $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
+    - arduino --verify --board arduino:avr:uno $TRAVIS_BUILD_DIR/src/BasicOTA.ino
+    - arduino -v --verbose-build --verify $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino
 #notifications:
 #      email:
 #        on_success: change
