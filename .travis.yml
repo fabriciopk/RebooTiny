@@ -91,7 +91,7 @@ script:
     - sed -i 's/YOUR_SSID/'"${WIFI_SSID}"'/' $TRAVIS_BUILD_DIR/src/RebooTinny/RebooTinny.ino
     - sed -i 's/YOUR_PASSWORD/'"${WIFI_PASSWD}"'/' $TRAVIS_BUILD_DIR/src/RebooTinny/RebooTinny.ino
     - arduino --pref build.path=/$TRAVIS_BUILD_DIR/build/BasicOTA --verify $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
-    - arduino --pref build.path=/$TRAVIS_BUILD_DIR/build/RebooTinny --verify $TRAVIS_BUILD_DIR/src/esp_relay/RebooTinny.ino
+    - arduino --pref build.path=/$TRAVIS_BUILD_DIR/build/RebooTinny --verify $TRAVIS_BUILD_DIR/src/RebooTinny/RebooTinny.ino
     - ls $TRAVIS_BUILD_DIR/build/RebooTinny
 
 after_success:
