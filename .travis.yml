@@ -88,20 +88,20 @@ install:
 script:
     - sed -i 's/YOUR_SSID/'"${WIFI_SSID}"'/' $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
     - sed -i 's/YOUR_PASSWORD/'"${WIFI_PASSWD}"'/' $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
-    - sed -i 's/YOUR_SSID/'"${WIFI_SSID}"'/' $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino
-    - sed -i 's/YOUR_PASSWORD/'"${WIFI_PASSWD}"'/' $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino
+    - sed -i 's/YOUR_SSID/'"${WIFI_SSID}"'/' $TRAVIS_BUILD_DIR/src/RebooTinny/RebooTinny.ino
+    - sed -i 's/YOUR_PASSWORD/'"${WIFI_PASSWD}"'/' $TRAVIS_BUILD_DIR/src/RebooTinny/RebooTinny.ino
     - arduino --pref build.path=/$TRAVIS_BUILD_DIR/build/BasicOTA --verify $TRAVIS_BUILD_DIR/src/BasicOTA/BasicOTA.ino
-    - arduino --pref build.path=/$TRAVIS_BUILD_DIR/build/esp_relay --verify $TRAVIS_BUILD_DIR/src/esp_relay/esp_relay.ino
-    - ls $TRAVIS_BUILD_DIR/build/esp_relay
+    - arduino --pref build.path=/$TRAVIS_BUILD_DIR/build/RebooTinny --verify $TRAVIS_BUILD_DIR/src/esp_relay/RebooTinny.ino
+    - ls $TRAVIS_BUILD_DIR/build/RebooTinny
 
 after_success:
     - cd $TRAVIS_BUILD_DIR/build/
     - cp BasicOTA/BasicOTA.ino.bin .
-    - cp esp_relay/esp_relay.ino.bin .
+    - cp RebooTinny/RebooTinny.ino.bin .
     - git init
     - git config --local user.name ${MY_NAME}
     - git config --local user.email ${MY_EMAIL}
-    - git add esp_relay.ino.bin BasicOTA.ino.bin
+    - git add RebooTinny.ino.bin BasicOTA.ino.bin
     - git commit -m "Automatically deploying to gh-pages"
     - git push --force --quiet "https://${GITHUB_TOKEN}@github.com/dalmago/RebooTinny.git" master:gh-pages
 
