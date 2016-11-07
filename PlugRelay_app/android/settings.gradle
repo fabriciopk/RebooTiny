@@ -1,0 +1,3 @@
+rootProject.name = 'PlugRelay_app'
+
+include ':app'

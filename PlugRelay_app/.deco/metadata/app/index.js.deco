@@ -1,0 +1,34 @@
+{
+	"liveValues": [
+		{
+			"range": {
+				"from": {
+					"line": 69,
+					"ch": 60
+				},
+				"to": {
+					"line": 69,
+					"ch": 78
+				}
+			},
+			"editWith": "colorPicker",
+			"type": "string",
+			"name": "plug_off"
+		},
+		{
+			"range": {
+				"from": {
+					"line": 69,
+					"ch": 80
+				},
+				"to": {
+					"line": 69,
+					"ch": 103
+				}
+			},
+			"editWith": "colorPicker",
+			"type": "string",
+			"name": "plug_on"
+		}
+	]
+}
